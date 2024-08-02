@@ -6,8 +6,20 @@ class Entitlement:
         self.description = description
         self.members = members
 
+
 class Requester:
-    def __init__(self, id, mgmt_chain, manager, manager_id, title, department, global_job_level, supervisory_organization, email):
+    def __init__(
+        self,
+        id,
+        mgmt_chain,
+        manager,
+        manager_id,
+        title,
+        department,
+        global_job_level,
+        supervisory_organization,
+        email,
+    ):
         self.id = id
         self.mgmt_chain = mgmt_chain
         self.manager = manager
@@ -19,8 +31,11 @@ class Requester:
         self.supervisory_organization = supervisory_organization
         self.email = email
 
+
 class AccessRequest:
-    def __init__(self, id, description, duration, requester, entitlement, iga_metadata={}):
+    def __init__(
+        self, id, description, duration, requester, entitlement, iga_metadata={}
+    ):
         self.id = id
         self.description = description
         self.duration = duration
