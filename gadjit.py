@@ -10,6 +10,21 @@ aigateway.initialize()
 
 
 def run(event):
+    """
+    Run the event processing for access requests.
+
+    Args:
+        event: The event triggering the function.
+
+    Returns:
+        None
+
+    Note:
+        This function fetches access requests using the plugin_conductorone_cron plugin, computes final scores using the utils.compute_scores function, and makes recommendations based on the final score. If the final score is greater than or equal to 1, it approves the request and adds a comment recommending automatic approval. If the final score is less than 1, it adds a comment recommending manual review of the request.
+
+    Raises:
+        None
+    """
     llm_plugin = aigateway
     iga_plugin = plugin_conductorone_cron
 

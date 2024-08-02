@@ -7,6 +7,21 @@ from json.decoder import JSONDecodeError
 def match_user_properties_to_existing_group_members(
     llm_plugin, field_type, field_value, entitlement_users
 ):
+    """
+    Match user properties to existing group members based on a specified field type and value.
+
+    Args:
+        llm_plugin: The plugin to use for querying user properties.
+        field_type (str): The type of field to match against (e.g. 'title_and_department', 'SupervisoryOrganization').
+        field_value: The value of the field to match against.
+        entitlement_users: A list of existing group members to match against.
+
+    Returns:
+        list: A list of users who match the specified field type and value.
+
+    Raises:
+        ValueError: If the field_type is not supported.
+    """
     if field_type == "title_and_department":
         field_type_verbose = "job title"
         system_example_field_input = "Senior Analyst, Eng - Online Grocery"
@@ -65,6 +80,27 @@ def _generic_profile_field_query(
     system_example_unrelated,
     entitlement_users,
 ):
+    """
+    Query for closely matching group members based on a new applicant's profile field.
+
+    Args:
+        llm_plugin: The plugin used for querying.
+        field_type (str): The type of profile field to compare.
+        field_type_verbose (str): A verbose description of the profile field.
+        field_value (str): The value of the profile field for the new applicant.
+        system_example_field_input (str): An example of the profile field value for the system prompt.
+        system_example_strongly_related (str): An example of a strongly related profile field value for the system prompt.
+        system_example_unrelated (str): An example of an unrelated profile field value for the system prompt.
+        entitlement_users (dict): A dictionary containing user profiles keyed by email.
+
+    Returns:
+        str: The query result in JSON format following specified syntax.
+
+    This function generates prompts for comparing a new applicant's profile field value to existing group members' values and requests a response in JSON format. It then queries the llm_plugin using the prompts provided and returns the result.
+
+    Raises:
+        None
+    """
     entitlement_users_flattened = []
     for email, profile in entitlement_users.items():
         # entitlement_users_flattened.append(f"{email}: {profile[field_type]}")
@@ -136,6 +172,29 @@ def match_user_properties_to_entitlement_properties(
     entitlement_name,
     entitlement_description,
 ):
+    """
+    Match user properties to entitlement properties and determine the relationship score.
+
+    Args:
+        llm_plugin (obj): The plugin object used to query the Language Model (LLM) system.
+        task_target_profile_title_dept (str): The job title of the new applicant.
+        entitlement_name (str): The name of the group controlling access to a resource.
+        entitlement_description (str): The description of the group controlling access to a resource.
+
+    Returns:
+        float: The relationship score indicating the match between the applicant's job title and the group.
+
+    Raises:
+        None
+
+    Example Usage:
+        relationship_score = match_user_properties_to_entitlement_properties(llm_plugin, task_target_profile_title_dept, entitlement_name, entitlement_description)
+
+        JSON output will be in the format:
+        {
+            "relationship_score": 0.5
+        }
+    """
     user_prompt = (
         f"A new applicant wants to join the group. The applicant has the job title "
         f'of:\n"{task_target_profile_title_dept}"\n\nThe group\'s '
@@ -214,6 +273,18 @@ def match_user_properties_to_entitlement_properties(
 
 def compute_scores(access_request, llm_plugin):
     # Compare requester's title and supervisory org data to the existing members of this entitlement
+    """
+    Compute scores for access request based on user properties and entitlement properties.
+
+    Args:
+        access_request (AccessRequest): An object representing the access request being made.
+        llm_plugin (LLMPlugin): An object representing the LLM plugin being used.
+
+    Returns:
+        float: The final computed score for the access request.
+
+    This function computes scores for the access request by matching user properties to existing group members and entitlement properties. It then calculates the final score based on the top three scores and optionally applies a multiplier based on the entitlement properties.
+    """
     title_results = match_user_properties_to_existing_group_members(
         llm_plugin,
         "title_and_department",

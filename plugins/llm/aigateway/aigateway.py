@@ -17,10 +17,37 @@ AI_GATEWAY_ROLE_CREDENTIALS_TIMESTAMP = None
 
 
 def initialize():
+    """
+    Initialize function with no parameters.
+
+    This function does not perform any operation and serves as a placeholder for future functionality.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     pass
 
 
 def query(system_prompt, user_prompt):
+    """
+    Send a query to an AI system and retrieve the response.
+
+    Args:
+        system_prompt (str): The prompt for the AI system.
+        user_prompt (str): The prompt for the user.
+
+    Returns:
+        str: The response from the AI system.
+
+    Raises:
+        Exception: If the response from the AI system contains an error message.
+        JSONDecodeError: If there is an issue decoding the JSON response.
+        KeyError: If there is a key error in parsing the response.
+        TypeError: If there is a type error in parsing the response.
+    """
     headers = {
         "Content-Type": "application/json",
     }
@@ -87,6 +114,20 @@ def query(system_prompt, user_prompt):
 
 
 def _get_access_token():
+    """
+    Get the access token for AWS credentials.
+
+    If the AWS credentials are not cached or have expired, refresh them by assuming the specified role.
+
+    Returns:
+        credentials (botocore.credentials.Credentials): The AWS credentials after assuming the specified role.
+
+    Notes:
+        The function updates the global variables AI_GATEWAY_ROLE_CREDENTIALS and AI_GATEWAY_ROLE_CREDENTIALS_TIMESTAMP.
+
+    Raises:
+        RuntimeError: If there is an issue assuming the role or getting the credentials.
+    """
     global AI_GATEWAY_ROLE_CREDENTIALS, AI_GATEWAY_ROLE_CREDENTIALS_TIMESTAMP
 
     # Have we assumed our target role and saved session creds?
@@ -117,6 +158,18 @@ def _get_access_token():
 
 
 def __assume_role(role_arn):
+    """
+    Assume an IAM Role using AWS STS service.
+
+    Args:
+        role_arn (str): The Amazon Resource Name (ARN) of the IAM role to assume.
+
+    Returns:
+        dict: A dictionary containing the temporary security credentials.
+
+    Raises:
+        AWSClientError: If there's an issue with the boto3 client or assuming the role.
+    """
     sts_client = boto3.client("sts")
     assumed_role = sts_client.assume_role(
         RoleArn=role_arn, RoleSessionName="aigateway-session"

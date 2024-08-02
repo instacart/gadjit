@@ -15,6 +15,16 @@ API_BASE_URL = os.getenv("C1_BASE_URL")
 
 def authenticate():
     # Token endpoint
+    """
+    Authenticate and retrieve an access token from the API.
+
+    Returns:
+        str: The access token for authentication.
+
+    Raises:
+        JSONDecodeError: If there is an issue decoding the response content.
+        KeyError: If the authentication call does not return an access token.
+    """
     token_url = f"{API_BASE_URL}/auth/v1/token"
 
     # Parameters for token request
@@ -55,6 +65,18 @@ def authenticate():
 
 
 def search_tasks(access_token):
+    """
+    Search for tasks using the provided access token.
+
+    Args:
+        access_token (str): The access token used for authentication.
+
+    Returns:
+        list: A list of dictionaries containing task summaries.
+
+    Raises:
+        HTTPError: If the HTTP request returns an unsuccessful status code.
+    """
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -118,6 +140,19 @@ def search_tasks(access_token):
 
 def get_user(access_token, user_id):
     # Prepare header with the access token
+    """
+    Get user details based on the access token and user ID.
+
+    Args:
+        access_token (str): Access token for authorization.
+        user_id (str): User ID for fetching user details.
+
+    Returns:
+        dict: User profile data including manager information.
+
+    Raises:
+        requests.HTTPError: If there is an HTTP error response from the API.
+    """
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -147,6 +182,20 @@ def get_user(access_token, user_id):
 
 
 def get_entitlement(access_token, app_id, app_entitlement_id):
+    """
+    Get the entitlement data for a specific app and entitlement ID.
+
+    Args:
+        access_token (str): The access token used for authentication.
+        app_id (str): The ID of the app.
+        app_entitlement_id (str): The ID of the entitlement.
+
+    Returns:
+        dict: The entitlement data for the specified app and entitlement ID.
+
+    Raises:
+        HTTPError: If the GET request to the API endpoint fails.
+    """
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -161,6 +210,20 @@ def get_entitlement(access_token, app_id, app_entitlement_id):
 
 
 def get_entitlement_members(access_token, app_id, app_entitlement_id):
+    """
+    Get the members of an entitlement from an app.
+
+    Args:
+        access_token (str): The access token for authentication.
+        app_id (str): The ID of the app.
+        app_entitlement_id (str): The ID of the app entitlement.
+
+    Returns:
+        dict: A dictionary containing the entitlement users with their details.
+
+    Raises:
+        HTTPError: If the response status code is not successful.
+    """
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -211,6 +274,20 @@ def get_entitlement_members(access_token, app_id, app_entitlement_id):
 
 
 def comment_task(access_token, task_id, comment):
+    """
+    Add a comment to a task using the provided access token.
+
+    Args:
+        access_token (str): The access token for authentication.
+        task_id (int): The ID of the task to add the comment to.
+        comment (str): The comment to be added to the task.
+
+    Raises:
+        HTTPError: If the POST request to add a comment fails.
+
+    Returns:
+        None
+    """
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -225,6 +302,18 @@ def comment_task(access_token, task_id, comment):
 
 
 def reassign_task(access_token, task_id, task_policy_step_id, reassign_to_user):
+    """
+    Reassign a task to a different user.
+
+    Args:
+        access_token (str): The access token for authentication.
+        task_id (int): The ID of the task to be reassigned.
+        task_policy_step_id (int): The ID of the policy step related to the task.
+        reassign_to_user (int): The ID of the user to reassign the task to.
+
+    Raises:
+        HTTPError: If the POST request to reassign the task fails.
+    """
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -242,6 +331,19 @@ def reassign_task(access_token, task_id, task_policy_step_id, reassign_to_user):
 
 
 def get_task(access_token, task_id):
+    """
+    Retrieve information about a specific task from the API.
+
+    Args:
+        access_token (str): The access token for authentication.
+        task_id (int): The ID of the task to retrieve.
+
+    Returns:
+        dict: A dictionary containing information about the task.
+
+    Raises:
+        None.
+    """
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -256,6 +358,20 @@ def get_task(access_token, task_id):
 
 
 def approve_task(access_token, task_id, task_policy_step_id):
+    """
+    Approve a task with the specified task ID and policy step ID using the provided access token.
+
+    Args:
+        access_token (str): The access token for authentication.
+        task_id (str): The ID of the task to approve.
+        task_policy_step_id (str): The ID of the policy step for the task.
+
+    Raises:
+        HTTPError: If the HTTP request to approve the task fails.
+
+    Returns:
+        dict: The JSON response data after approving the task.
+    """
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
