@@ -7,20 +7,44 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util import Retry
 
 
-class ConductorOneAPIClient():
+class ConductorOneAPIClient:
+    """
+    A class representing an API client for ConductorOne.
+
+    Attributes:
+        config (dict): A dictionary containing configuration values.
+    """
+
     def __init__(self, config):
+        """
+        Initialize the class with a configuration object.
+
+        Args:
+            config (object): The configuration object to be stored.
+
+        Returns:
+            None
+        """
         self.config = config
 
     def authenticate(self):
 
         # Token endpoint
+        """
+        Authenticate the user with ConducutorOne API.
+
+        Raises a JSONDecodeError if the response content cannot be decoded as JSON, or a KeyError if the authentication call does not return an access token.
+
+        Returns:
+            str: The access token for authentication.
+        """
         token_url = f"{self.config.get('base_url')}/auth/v1/token"
 
         # Parameters for token request
         params = {
             "grant_type": "client_credentials",
-            "client_id": self.config.get('client_id'),
-            "client_secret": self.config.get('client_secret'),
+            "client_id": self.config.get("client_id"),
+            "client_secret": self.config.get("client_secret"),
         }
 
         # Request to get the token
@@ -32,7 +56,9 @@ class ConductorOneAPIClient():
         )
         s = Session()
         s.mount("https://", HTTPAdapter(max_retries=retries))
-        response = s.post(token_url, data=params)  # Raise requests.exceptions.RetryError
+        response = s.post(
+            token_url, data=params
+        )  # Raise requests.exceptions.RetryError
 
         try:
             result = response.json()
@@ -53,6 +79,19 @@ class ConductorOneAPIClient():
         return access_token
 
     def search_tasks(self, access_token, created_after):
+        """
+        Search for tasks based on criteria and retrieve task summaries.
+
+        Args:
+            access_token (str): The access token used for authentication.
+            created_after (str): The timestamp after which tasks were created.
+
+        Returns:
+            list: A list of dictionaries containing task summaries.
+
+        Raises:
+            HTTPError: If the HTTP request to the API fails.
+        """
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -105,6 +144,19 @@ class ConductorOneAPIClient():
         return task_summaries
 
     def get_user(self, access_token, user_id):
+        """
+        Get user profile details by user ID using the provided access token.
+
+        Args:
+            access_token (str): Access token for authentication.
+            user_id (str): ID of the user whose profile details need to be fetched.
+
+        Returns:
+            dict: User profile details including manager ID.
+
+        Raises:
+            requests.exceptions.HTTPError: If a HTTP error response is received.
+        """
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -117,7 +169,9 @@ class ConductorOneAPIClient():
         response.raise_for_status()
         response_data = response.json()
 
-        managers = response_data.get("userView", {}).get("user", {}).get("managerIds", [])
+        managers = (
+            response_data.get("userView", {}).get("user", {}).get("managerIds", [])
+        )
         if len(managers) > 0:
             manager_id = (
                 response_data.get("userView", {}).get("user", {}).get("managerIds")[0]
@@ -133,6 +187,20 @@ class ConductorOneAPIClient():
         return profile
 
     def get_entitlement(self, access_token, app_id, app_entitlement_id):
+        """
+        Get the entitlement details for a given app and entitlement ID.
+
+        Args:
+            access_token (str): The access token for authentication.
+            app_id (str): The ID of the app.
+            app_entitlement_id (str): The ID of the app entitlement.
+
+        Returns:
+            dict: JSON response containing the entitlement details.
+
+        Raises:
+            HTTPError: If the HTTP request returns an error status code.
+        """
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -146,6 +214,21 @@ class ConductorOneAPIClient():
         return response_data
 
     def get_entitlement_members(self, access_token, app_id, app_entitlement_id):
+        """
+        Get the list of entitlement members for a specific app entitlement.
+
+        Args:
+            self: The object instance.
+            access_token (str): The access token for authentication.
+            app_id (str): The ID of the application.
+            app_entitlement_id (str): The ID of the app entitlement.
+
+        Returns:
+            dict: A dictionary containing the entitlement users' details.
+
+        Raises:
+            HTTPError: If there is an HTTP error response from the API.
+        """
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -195,6 +278,17 @@ class ConductorOneAPIClient():
         return entitlement_users
 
     def comment_task(self, access_token, task_id, comment):
+        """
+        Add a comment to a task using the specified access token.
+
+        Args:
+            access_token (str): The access token for authentication.
+            task_id (str): The ID of the task to add the comment to.
+            comment (str): The content of the comment to be added.
+
+        Raises:
+            requests.exceptions.HTTPError: If the POST request to add the comment fails.
+        """
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -207,7 +301,24 @@ class ConductorOneAPIClient():
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()
 
-    def reassign_task(self, access_token, task_id, task_policy_step_id, reassign_to_user):
+    def reassign_task(
+        self, access_token, task_id, task_policy_step_id, reassign_to_user
+    ):
+        """
+        Reassign a task to a different user.
+
+        Args:
+            access_token (str): The access token for authentication.
+            task_id (str): The unique identifier of the task.
+            task_policy_step_id (str): The policy step ID of the task.
+            reassign_to_user (str): The user ID to reassign the task to.
+
+        Raises:
+            HTTPError: If the request to reassign the task fails.
+
+        Returns:
+            None
+        """
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -224,6 +335,16 @@ class ConductorOneAPIClient():
         response.raise_for_status()
 
     def get_task(self, access_token, task_id):
+        """
+        Get a specific task using the provided access token and task ID.
+
+        Args:
+            access_token (str): A valid access token for authentication.
+            task_id (str): The ID of the task to retrieve.
+
+        Returns:
+            dict: The data of the requested task.
+        """
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -237,6 +358,20 @@ class ConductorOneAPIClient():
         return response_data
 
     def approve_task(self, access_token, task_id, task_policy_step_id):
+        """
+        Approve a task by sending a request to the API.
+
+        Args:
+            access_token (str): The access token for authentication.
+            task_id (int): The ID of the task to approve.
+            task_policy_step_id (int): The ID of the task policy step.
+
+        Returns:
+            None
+
+        Raises:
+            requests.HTTPError: If the request to the API fails.
+        """
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",

@@ -9,29 +9,43 @@ with open("config.yaml", "r") as file:
     config = yaml.safe_load(file)
     config = utils.process_env_variables(config)
 
-logging.basicConfig(level=getattr(logging, config.get('gadjit').get('log_level').upper()))
+logging.basicConfig(
+    level=getattr(logging, config.get("gadjit").get("log_level").upper())
+)
+
 
 def run(event):
 
     # Load all plugins
-    iga_plugins = utils.load_plugins('iga', config)
+    """
+    Run the access approval workflow using various plugins.
+
+    Args:
+        event: The event triggering the access approval workflow.
+
+    Raises:
+        RuntimeError: If more than one IGA or LLM plugin is enabled, or if no Scoring plugins are enabled.
+    """
+    iga_plugins = utils.load_plugins("iga", config)
     if len(iga_plugins) != 1:
         raise RuntimeError("Only one IGA plugin can be enabled at a time.")
     iga_plugin = iga_plugins[0]
 
-    llm_plugins = utils.load_plugins('llm', config)
+    llm_plugins = utils.load_plugins("llm", config)
     if len(llm_plugins) != 1:
         raise RuntimeError("Only one LLM plugin can be enabled at a time.")
     llm_plugin = llm_plugins[0]
 
-    scoring_plugins = utils.load_plugins('scoring', config)
+    scoring_plugins = utils.load_plugins("scoring", config)
     if len(scoring_plugins) < 1:
         raise RuntimeError("At least one Scoring plugin must be enabled.")
 
     access_requests = iga_plugin.retrieve_requests(event)
     for access_request in access_requests:
         scores = []
-        for score_result in utils.plugins_run_function(scoring_plugins, "compute_scores", access_request, llm_plugin):
+        for score_result in utils.plugins_run_function(
+            scoring_plugins, "compute_scores", access_request, llm_plugin
+        ):
             scores.append(score_result)
 
         final_score = sum(scores) / len(scores)

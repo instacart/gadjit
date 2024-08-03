@@ -11,10 +11,34 @@ from models import BaseGadjitLLMPlugin
 
 
 class AWSAPIGatewayOpenAIProxyPlugin(BaseGadjitLLMPlugin):
+    """
+    A class representing a plugin for interacting with OpenAI's GPT-4o model through AWS API Gateway.
+
+    Attributes:
+        api_gateway_role_credentials (dict): The AWS credentials for accessing the API Gateway.
+        api_gateway_role_credentials_timestamp (datetime): The timestamp of the last time the AWS credentials were refreshed.
+    """
+
     api_gateway_role_credentials = None
     api_gateway_role_credentials_timestamp = None
 
     def query(self, system_prompt, user_prompt):
+        """
+        Query OpenAI API with system and user prompts and return response.
+
+        Args:
+            system_prompt (str): The prompt for the system message.
+            user_prompt (str): The prompt for the user message.
+
+        Returns:
+            str: The response content from OpenAI API.
+
+        Raises:
+            Exception: If there is an error message in the response.
+            JSONDecodeError: If there is an issue decoding the JSON response.
+            KeyError: If the expected key is not found in the response.
+            TypeError: If the response type is not as expected.
+        """
         headers = {
             "Content-Type": "application/json",
         }
@@ -36,7 +60,7 @@ class AWSAPIGatewayOpenAIProxyPlugin(BaseGadjitLLMPlugin):
         # Generate SigV4 signed request
         req = AWSRequest(
             method=method,
-            url=self.config.get('api_gateway_url'),
+            url=self.config.get("api_gateway_url"),
             data=json.dumps(data),
             params=None,
             headers=headers,
@@ -81,13 +105,25 @@ class AWSAPIGatewayOpenAIProxyPlugin(BaseGadjitLLMPlugin):
 
     def _get_access_token(self):
         # Have we assumed our target role and saved session creds?
+        """
+        Get the AWS access token.
+
+        Returns the AWS access token based on the API Gateway role credentials and refreshes them if they are older than 5 minutes.
+
+        Returns:
+            botocore.credentials.ReadOnlyCredentials: The AWS access token.
+
+        Raises:
+            N/A
+        """
         if not self.api_gateway_role_credentials or (
-            datetime.now() - self.api_gateway_role_credentials_timestamp > timedelta(minutes=5)
+            datetime.now() - self.api_gateway_role_credentials_timestamp
+            > timedelta(minutes=5)
         ):
             logging.debug(
                 f"Refreshing AWS credentials. Last cached timestamp: {self.api_gateway_role_credentials_timestamp}"
             )
-            credentials = self.__assume_role(self.config.get('api_gateway_role_arn'))
+            credentials = self.__assume_role(self.config.get("api_gateway_role_arn"))
 
             # Update boto3 session with assumed role credentials
             boto3_session = boto3.Session(
@@ -107,6 +143,21 @@ class AWSAPIGatewayOpenAIProxyPlugin(BaseGadjitLLMPlugin):
         return self.api_gateway_role_credentials
 
     def __assume_role(self, role_arn):
+        """
+        Assume the role specified by the role ARN and return the credentials.
+
+        Args:
+            role_arn (str): The Amazon Resource Name (ARN) of the role to assume.
+
+        Returns:
+            dict: A dictionary containing the temporary security credentials.
+
+        Note:
+            This function requires the boto3 library to be installed.
+
+        Raises:
+            Boto3Error: If there is an issue with the boto3 client or assuming the role.
+        """
         sts_client = boto3.client("sts")
         assumed_role = sts_client.assume_role(
             RoleArn=role_arn, RoleSessionName="aigateway-session"

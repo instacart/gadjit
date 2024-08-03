@@ -4,8 +4,32 @@ import logging
 from json.decoder import JSONDecodeError
 from models import BaseGadjitScoringPlugin
 
+
 class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
+    """
+    A plugin for computing scores based on user profile attributes proximity.
+
+    Attributes:
+        None
+
+    Methods:
+        compute_scores: Computes scores based on user profile attributes and entitlements.
+        _match_user_properties_to_existing_group_members: Matches user properties to existing group members.
+        _match_user_properties_to_entitlement_properties: Matches user properties to entitlement properties.
+        __shared_words_percentage: Calculates the percentage of shared words between two strings.
+    """
+
     def compute_scores(self, access_request, llm_plugin):
+        """
+        Compute the scores for an access request based on various criteria.
+
+        Args:
+            access_request (AccessRequest): An object representing the access request.
+            llm_plugin (LLMPlugin): An object representing the plugin used for matching user properties.
+
+        Returns:
+            float: The final score calculated based on the access request criteria.
+        """
         title_results = self._match_user_properties_to_existing_group_members(
             llm_plugin,
             "title_and_department",
@@ -20,11 +44,13 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
         )
 
         # Compare the requestor's title and department to the description field on the entitlement
-        entitlement_properties_results = self._match_user_properties_to_entitlement_properties(
-            llm_plugin,
-            access_request.requester.title_and_department,
-            access_request.entitlement.name,
-            access_request.entitlement.description,
+        entitlement_properties_results = (
+            self._match_user_properties_to_entitlement_properties(
+                llm_plugin,
+                access_request.requester.title_and_department,
+                access_request.entitlement.name,
+                access_request.entitlement.description,
+            )
         )
 
         # Prepare a dictionary for storing information about entitlement members who are proximate to our requestor
@@ -37,7 +63,8 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
                 access_request.requester.title_and_department,
             )
             existing_member_tally[title_result.get("user")] = (
-                existing_member_tally.setdefault(title_result.get("user"), 0) + percentage
+                existing_member_tally.setdefault(title_result.get("user"), 0)
+                + percentage
             )
 
         # Process supervisory organization match results
@@ -73,6 +100,22 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
     def _match_user_properties_to_existing_group_members(
         self, llm_plugin, field_type, field_value, entitlement_users
     ):
+        """
+        Match user properties to existing group members based on a specified field type.
+
+        Args:
+            llm_plugin: The plugin used for the query.
+            field_type (str): The type of field being matched (e.g. 'title_and_department', 'SupervisoryOrganization').
+            field_value: The value of the field being matched.
+            entitlement_users: The list of users to match against.
+
+        Returns:
+            list: A list of users that match the specified criteria.
+
+        Raises:
+            ValueError: If the field type is not supported.
+            JSONDecodeError: If there is an issue decoding the JSON response.
+        """
         if field_type == "title_and_department":
             field_type_verbose = "job title"
             system_example_field_input = "Senior Analyst, Eng - Online Grocery"
@@ -131,11 +174,39 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
         system_example_unrelated,
         entitlement_users,
     ):
+        """
+        Perform a query to find closely related group members to an applicant based on a specific field type.
+
+        Args:
+            llm_plugin: An instance of the llm_plugin class.
+            field_type (str): The type of field to compare for similarity.
+            field_type_verbose (str): A more descriptive version of the field type.
+            field_value (str): The value of the field for the new applicant.
+            system_example_field_input (str): An example value for the field type for the system prompt.
+            system_example_strongly_related (str): An example strongly related field value for the system prompt.
+            system_example_unrelated (str): An example unrelated field value for the system prompt.
+            entitlement_users (dict): A dictionary of entitlement users with emails as keys and profile information as values.
+
+        Returns:
+            str: The query result from the llm_plugin.
+
+        Notes:
+            - The function generates a user prompt and a system prompt based on the input parameters.
+            - The output from the query must follow a specific JSON format as described in the function.
+            - The function limits the number of users in the output to a maximum of 5 best matches.
+            - Matching criteria are based on conceptual similarity of field values.
+            - Provides guidance for comparing job titles based on engineering career leveling progression.
+
+        Raises:
+            None
+        """
         entitlement_users_flattened = []
         for email, profile in entitlement_users.items():
             # entitlement_users_flattened.append(f"{email}: {profile[field_type]}")
             # Send IDs to the LLM but not personal information like their email
-            entitlement_users_flattened.append(f"{profile['id']}: {profile[field_type]}")
+            entitlement_users_flattened.append(
+                f"{profile['id']}: {profile[field_type]}"
+            )
         entitlement_users_flattened_string = "\n".join(
             reversed(entitlement_users_flattened)
         )
@@ -202,6 +273,25 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
         entitlement_name,
         entitlement_description,
     ):
+        """
+        Match user properties to entitlement properties.
+
+        Args:
+            llm_plugin (plugin): The plugin used to query the LLM system for matching.
+            task_target_profile_title_dept (str): The job title of the new applicant.
+            entitlement_name (str): The name of the group controlling access.
+            entitlement_description (str): The description of the group controlling access.
+
+        Returns:
+            float: The relationship score between the new applicant's job title and the group's access control.
+
+        Raises:
+            None
+
+        Note:
+        The function uses the LLM plugin to query and determine the relationship score between the job title and group access control based on provided information.
+        The output must be in JSON format with the key 'relationship_score'.
+        """
         user_prompt = (
             f"A new applicant wants to join the group. The applicant has the job title "
             f'of:\n"{task_target_profile_title_dept}"\n\nThe group\'s '
