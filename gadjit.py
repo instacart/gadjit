@@ -1,36 +1,40 @@
+import yaml
 import logging
+import models
 import utils
 
-from plugins.iga.conductorone import plugin_conductorone_cron
-from plugins.llm.aigateway import aigateway
 
+# Load configuration
+with open("config.yaml", "r") as file:
+    config = yaml.safe_load(file)
+    config = utils.process_env_variables(config)
 
-plugin_conductorone_cron.initialize()
-aigateway.initialize()
-
+logging.basicConfig(level=getattr(logging, config.get('gadjit').get('log_level').upper()))
 
 def run(event):
-    """
-    Run the event processing for access requests.
 
-    Args:
-        event: The event triggering the function.
+    # Load all plugins
+    iga_plugins = utils.load_plugins('iga', config)
+    if len(iga_plugins) != 1:
+        raise RuntimeError("Only one IGA plugin can be enabled at a time.")
+    iga_plugin = iga_plugins[0]
 
-    Returns:
-        None
+    llm_plugins = utils.load_plugins('llm', config)
+    if len(llm_plugins) != 1:
+        raise RuntimeError("Only one LLM plugin can be enabled at a time.")
+    llm_plugin = llm_plugins[0]
 
-    Note:
-        This function fetches access requests using the plugin_conductorone_cron plugin, computes final scores using the utils.compute_scores function, and makes recommendations based on the final score. If the final score is greater than or equal to 1, it approves the request and adds a comment recommending automatic approval. If the final score is less than 1, it adds a comment recommending manual review of the request.
+    scoring_plugins = utils.load_plugins('scoring', config)
+    if len(scoring_plugins) < 1:
+        raise RuntimeError("At least one Scoring plugin must be enabled.")
 
-    Raises:
-        None
-    """
-    llm_plugin = aigateway
-    iga_plugin = plugin_conductorone_cron
-
-    access_requests = iga_plugin.get_access_requests(event)
+    access_requests = iga_plugin.retrieve_requests(event)
     for access_request in access_requests:
-        final_score = utils.compute_scores(access_request, llm_plugin)
+        scores = []
+        for score_result in utils.plugins_run_function(scoring_plugins, "compute_scores", access_request, llm_plugin):
+            scores.append(score_result)
+
+        final_score = sum(scores) / len(scores)
         final_score = round(final_score, 2)
 
         comment = None

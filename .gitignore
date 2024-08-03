@@ -1,3 +1,6 @@
+# Configuration files which may have sensitive information
+config.yaml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -127,3 +130,4 @@ dmypy.json
 
 # Additional
 .idea
+.DS_Store
