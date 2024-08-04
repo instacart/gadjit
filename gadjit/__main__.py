@@ -64,7 +64,7 @@ def main(event=None):
                 f"This is an automated message. [{final_score}]"
             )
             iga_plugin.comment_request(access_request, comment)
-            iga_plugin.approve_request(access_request)
+            # iga_plugin.approve_request(access_request)  # TODO uncomment
         else:
             logging.info(
                 f"Score: {final_score}; recommending {access_request.requester.email} NOT be added to {access_request.entitlement.name} automatically."

@@ -154,7 +154,7 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
             results = json.loads(llm_result).get("overlap_users")
         except JSONDecodeError as e:
             logging.exception(
-                "The following content caused the JSONDecodeError: {llm_result}"
+                f"The following content caused the JSONDecodeError: {llm_result}"
             )
             raise e
 
@@ -235,7 +235,7 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
             f'    "overlap_users": [\n'
             f"        {{\n"
             f'            "user": "2UzZUNHoFtzbGuuNi0H6FZ0c2rY",\n'
-            f'            "{field_type}": "{system_example_strongly_related}",\n'
+            f'            "{field_type}": "{system_example_strongly_related}"\n'
             f"        }}\n"
             f"    ]\n"
             f"}}\n\n"
@@ -344,7 +344,7 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
             f"}}\n\n"
             f"Again, if you cannot determine a score based on the information provided, output:\n"
             f"{{\n"
-            f'    "relationship_score": 1,\n'
+            f'    "relationship_score": 1\n'
             f"}}\n\n"
         )
 
@@ -358,7 +358,7 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
             results = json.loads(llm_result).get("relationship_score")
         except JSONDecodeError as e:
             logging.exception(
-                "The following content caused the JSONDecodeError: {llm_result}"
+                f"The following content caused the JSONDecodeError: {llm_result}"
             )
             raise e
 

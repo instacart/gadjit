@@ -57,7 +57,7 @@ class ConductorOneCronPlugin(models.BaseGadjitIGAPlugin):
         # Prepare time-related search operators
         now = datetime.utcnow()
         one_minute_ago = now - timedelta(
-            hours=16
+            hours=16  # TODO change to 65s
         )  # cron runs once per minute, adding a few seconds of grace
         created_after = one_minute_ago.strftime("%Y-%m-%dT%H:%M:%SZ")
 
