@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
+
 import yaml
 import logging
-import models
-import utils
 
+from . import utils
+from . import models
 
 # Load configuration
 with open("config.yaml", "r") as file:
@@ -14,9 +16,7 @@ logging.basicConfig(
 )
 
 
-def run(event):
-
-    # Load all plugins
+def main(event=None):
     """
     Run the access approval workflow using various plugins.
 
@@ -26,6 +26,8 @@ def run(event):
     Raises:
         RuntimeError: If more than one IGA or LLM plugin is enabled, or if no Scoring plugins are enabled.
     """
+
+    # Load all plugins
     iga_plugins = utils.load_plugins("iga", config)
     if len(iga_plugins) != 1:
         raise RuntimeError("Only one IGA plugin can be enabled at a time.")
@@ -54,7 +56,7 @@ def run(event):
         comment = None
         if final_score >= 1:
             logging.info(
-                f"Recommending {access_request.requester.email} be added to {access_request.entitlement.name} automatically."
+                f"Score: {final_score}; recommending {access_request.requester.email} be added to {access_request.entitlement.name} automatically."
             )
             comment = (
                 f"The Instacart Security team's AI-powered access assistance bot "
@@ -65,7 +67,7 @@ def run(event):
             iga_plugin.approve_request(access_request)
         else:
             logging.info(
-                f"Recommending {access_request.requester.email} NOT be added to {access_request.entitlement.name} automatically."
+                f"Score: {final_score}; recommending {access_request.requester.email} NOT be added to {access_request.entitlement.name} automatically."
             )
             comment = (
                 f"The Instacart Security team's AI-powered access assistance bot "
@@ -75,3 +77,7 @@ def run(event):
                 f"to provide the requestor access. This is an automated message. [{final_score}]"
             )
             iga_plugin.comment_request(access_request, comment)
+
+
+if __name__ == "__main__":
+    main()

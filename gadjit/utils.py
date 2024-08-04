@@ -1,6 +1,7 @@
 import importlib
-import models
 import os
+
+from . import models
 
 
 def process_env_variables(config):
@@ -82,9 +83,9 @@ def load_plugins(plugin_type, config):
         AttributeError: If the specified plugin class is not found in the imported file.
     """
     plugin_dirs = {
-        "iga": "plugins/iga",
-        "llm": "plugins/llm",
-        "scoring": "plugins/scoring",
+        "iga": "gadjit/plugins/iga",
+        "llm": "gadjit/plugins/llm",
+        "scoring": "gadjit/plugins/scoring",
     }
 
     base_classes = {

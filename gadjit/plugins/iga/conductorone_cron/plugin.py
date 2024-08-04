@@ -2,14 +2,15 @@ import base64
 import json
 import logging
 import time
-import models
 from datetime import datetime, timedelta
 
-from plugins.iga.conductorone_cron.api import ConductorOneAPIClient
-from models import BaseGadjitIGAPlugin
+from gadjit import models
+from gadjit.plugins.iga.conductorone_cron.api import ConductorOneAPIClient
+
+# from plugins.iga.conductorone_cron.api import ConductorOneAPIClient
 
 
-class ConductorOneCronPlugin(BaseGadjitIGAPlugin):
+class ConductorOneCronPlugin(models.BaseGadjitIGAPlugin):
     """
     A class representing a ConductorOne cron plugin.
 

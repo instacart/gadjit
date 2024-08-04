@@ -7,7 +7,7 @@ import logging
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from datetime import datetime, timedelta
-from models import BaseGadjitLLMPlugin
+from gadjit.models import BaseGadjitLLMPlugin
 
 
 class AWSAPIGatewayOpenAIProxyPlugin(BaseGadjitLLMPlugin):

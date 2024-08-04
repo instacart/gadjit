@@ -2,7 +2,7 @@ import json
 import logging
 
 from json.decoder import JSONDecodeError
-from models import BaseGadjitScoringPlugin
+from gadjit.models import BaseGadjitScoringPlugin
 
 
 class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):

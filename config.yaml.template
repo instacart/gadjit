@@ -17,7 +17,7 @@ llm_plugins:
       secret_key: "OPENAI_API_KEY"
 
   - name: aws_api_gateway_openai_proxy
-    enabled: true
+    enabled: false
     config:
       api_gateway_url: "https://dawjryzpri.execute-api.us-east-1.amazonaws.com/proxy/openai/v1/chat/completions"
       api_gateway_role_arn: "arn:aws:iam::123456789123:role/apigateway-invocation-role"

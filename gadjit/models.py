@@ -20,7 +20,7 @@ class BaseGadjitIGAPlugin:
 
     def retrieve_requests(self, event):
         """
-        Retrieve a list of requests based on the event provided.
+        Retrieve a list of requests, either by pull or push based on the event provided.
 
         This method should be implemented by the plugin to retrieve requests based on the event.
 
@@ -31,6 +31,52 @@ class BaseGadjitIGAPlugin:
             NotImplementedError: If the method is called without being implemented by the plugin.
         """
         raise NotImplementedError("Plugin must implement the retrieve_requests method.")
+
+    def comment_request(self, access_request, comment):
+        """
+        Comment on an open access request.
+
+        Args:
+            access_request (AccessRequest): The access request object.
+            comment (str): The comment to be added to the access request.
+
+        Returns:
+            None
+
+        Raises:
+            NotImplementedError: If the method is called without being implemented by the plugin.
+        """
+        raise NotImplementedError("Plugin must implement the comment_request method.")
+
+    def approve_request(self, access_request):
+        """
+        Approve a user access request.
+
+        Args:
+            access_request (AccessRequest): An object representing the access request to be approved.
+
+        Returns:
+            None
+
+        Raises:
+            NotImplementedError: If the method is called without being implemented by the plugin.
+        """
+        raise NotImplementedError("Plugin must implement the approve_request method.")
+
+    def deny_request(self, access_request):
+        """
+        Deny a specific access request.
+
+        Args:
+            access_request (object): The access request object to be denied.
+
+        Returns:
+            None
+
+        Raises:
+            NotImplementedError: If the method is called without being implemented by the plugin.
+        """
+        raise NotImplementedError("Plugin must implement the deny_request method.")
 
 
 class BaseGadjitLLMPlugin:
