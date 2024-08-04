@@ -30,12 +30,12 @@ def main(event=None):
     # Load all plugins
     iga_plugins = utils.load_plugins("iga", config)
     if len(iga_plugins) != 1:
-        raise RuntimeError("Only one IGA plugin can be enabled at a time.")
+        raise RuntimeError("Exactly one IGA plugin can be enabled at a time.")
     iga_plugin = iga_plugins[0]
 
     llm_plugins = utils.load_plugins("llm", config)
     if len(llm_plugins) != 1:
-        raise RuntimeError("Only one LLM plugin can be enabled at a time.")
+        raise RuntimeError("Exactly one LLM plugin can be enabled at a time.")
     llm_plugin = llm_plugins[0]
 
     scoring_plugins = utils.load_plugins("scoring", config)

@@ -4,7 +4,7 @@ import json
 import requests
 import logging
 
-from models import BaseGadjitLLMPlugin
+from gadjit.models import BaseGadjitLLMPlugin
 
 
 class OpenAIPlugin(BaseGadjitLLMPlugin):
