@@ -90,7 +90,7 @@ class ConductorOneCronPlugin(models.BaseGadjitIGAPlugin):
 
     def approve_request(self, access_request):
         """
-        Approve a user access request and reassign the task if needed.
+        Reassign a the task to this bot's user and approve it.
 
         Args:
             access_request (AccessRequest): An object representing the access request to be approved.
@@ -125,7 +125,7 @@ class ConductorOneCronPlugin(models.BaseGadjitIGAPlugin):
 
     def deny_request(self, access_request):
         """
-        Deny a specific access request.
+        Reassign a the task to this bot's user and deny it.
 
         Args:
             access_request (object): The access request object to be denied.
@@ -136,7 +136,27 @@ class ConductorOneCronPlugin(models.BaseGadjitIGAPlugin):
         Raises:
             None
         """
-        pass
+        self.client.reassign_task(
+            self._get_access_token(),
+            access_request.id,
+            access_request.iga_metadata.get("policy_step_id"),
+            self.config.get("reassign_to_user"),
+        )
+
+        # Reassignment causes us to move to another step, which we need to get the ID of.
+        new_task_policy_step_id = (
+            self.client.get_task(self._get_access_token(), access_request.id)
+            .get("taskView")
+            .get("task", {})
+            .get("policy", {})
+            .get("current", {})
+            .get("id")
+        )
+
+        # Send the denial.
+        self.client.deny_task(
+            self._get_access_token(), access_request.id, new_task_policy_step_id
+        )
 
     def _get_access_token(self):
         """

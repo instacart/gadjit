@@ -383,7 +383,41 @@ class ConductorOneAPIClient:
         # Prepare the payload
         payload = {
             "policyStepId": task_policy_step_id,
-            "comment": "Manager approval is no longer required and your access has been granted. Have a wonderful day!",
+            "comment": "Manual approval is no longer required and your access has been granted. Have a wonderful day!",
+        }
+
+        # Send the POST request
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        response_data = response.json()
+
+    def deny_task(self, access_token, task_id, task_policy_step_id):
+        """
+        Deny a task by sending a request to the API.
+
+        Args:
+            access_token (str): The access token for authentication.
+            task_id (int): The ID of the task to deny.
+            task_policy_step_id (int): The ID of the task policy step.
+
+        Returns:
+            None
+
+        Raises:
+            requests.HTTPError: If the request to the API fails.
+        """
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+
+        url = f"{self.config.get('base_url')}/api/v1/tasks/{task_id}/action/deny"
+
+        # Prepare the payload
+        payload = {
+            "policyStepId": task_policy_step_id,
+            "comment": "This request has been closed.",
         }
 
         # Send the POST request

@@ -1,5 +1,15 @@
 gadjit:
   log_level: "info"
+  refer_to_myself_as: "The Gadjit AI-powered access assistance bot"
+  include_score_in_comments: true
+  entitlements_to_auto_approve:
+    - "Some-Entitlement-Name"
+    - "Team - Security"
+    - "The entitlement ID from your IGA system works too"
+    - "2cxuJXhzhPoqvbJR75xq8ZVCBsK"
+    - "In either case, matching is NOT case-sensitive"
+    - "team - security"
+    - "TEAM - SECURITY"
 
 iga_plugins:
   - name: conductorone_cron
