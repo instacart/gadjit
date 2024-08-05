@@ -267,7 +267,7 @@ class ConductorOneAPIClient:
                     "title": profile.get("title"),
                     "department": profile.get("department"),
                     "title_and_department": f"{profile.get('title')}, {profile.get('department')}",
-                    "SupervisoryOrganization": profile.get("SupervisoryOrganization"),
+                    "organizational_unit": profile.get("SupervisoryOrganization"),
                     "globalJobLevel": profile.get("globalJobLevel"),
                 }
 

@@ -36,11 +36,13 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
             access_request.requester.title_and_department,
             access_request.entitlement.members,
         )
-        supervisoryorg_results = self._match_user_properties_to_existing_group_members(
-            llm_plugin,
-            "SupervisoryOrganization",
-            access_request.requester.supervisory_organization,
-            access_request.entitlement.members,
+        organizationalunit_results = (
+            self._match_user_properties_to_existing_group_members(
+                llm_plugin,
+                "organizational_unit",
+                access_request.requester.organizational_unit,
+                access_request.entitlement.members,
+            )
         )
 
         # Compare the requestor's title and department to the description field on the entitlement
@@ -67,14 +69,16 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
                 + percentage
             )
 
-        # Process supervisory organization match results
-        for supervisoryorg_result in supervisoryorg_results:
+        # Process organizational_unit match results
+        for organizationalunit_result in organizationalunit_results:
             percentage = self.__shared_words_percentage(
-                supervisoryorg_result.get("SupervisoryOrganization"),
-                access_request.requester.supervisory_organization,
+                organizationalunit_result.get("organizational_unit"),
+                access_request.requester.organizational_unit,
             )
-            existing_member_tally[supervisoryorg_result.get("user")] = (
-                existing_member_tally.setdefault(supervisoryorg_result.get("user"), 0)
+            existing_member_tally[organizationalunit_result.get("user")] = (
+                existing_member_tally.setdefault(
+                    organizationalunit_result.get("user"), 0
+                )
                 + percentage
             )
 
@@ -105,7 +109,7 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
 
         Args:
             llm_plugin: The plugin used for the query.
-            field_type (str): The type of field being matched (e.g. 'title_and_department', 'SupervisoryOrganization').
+            field_type (str): The type of field being matched (e.g. 'title_and_department', 'organizational_unit').
             field_value: The value of the field being matched.
             entitlement_users: The list of users to match against.
 
@@ -123,13 +127,11 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
                 "Staff Software Engineer, Eng - Online Grocery"
             )
             system_example_unrelated = "Staff Compliance Auditor, Eng - Security"
-        elif field_type == "SupervisoryOrganization":
+        elif field_type == "organizational_unit":
             field_type_verbose = "organizational unit"
-            system_example_field_input = (
-                "Eng Algorithms - Economics - Marketplace Optimization"
-            )
-            system_example_strongly_related = "Eng Algorithms - Search ML"
-            system_example_unrelated = "Eng Marketplace - Growth Modeling"
+            system_example_field_input = "Eng Algorithms - Recommendation Optimization"
+            system_example_strongly_related = "Eng Algorithms - Search"
+            system_example_unrelated = "Hardware Design - Smart Carts"
         else:
             raise ValueError(f"Unsupported type '{field_type}'.")
 
@@ -377,6 +379,9 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
         Returns:
             float: The percentage of shared words.
         """
+        if not str1 or not str2:
+            return 0
+
         # Tokenize and normalize the words (split by spaces and convert to lowercase)
         # A word is anything >= 2 chars
         set1 = set(word for word in str1.lower().split() if len(word) >= 2)

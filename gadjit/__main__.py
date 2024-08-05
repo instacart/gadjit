@@ -6,9 +6,11 @@ import os
 import yaml
 import logging
 
-from collections import defaultdict
+from flask import Flask, request, jsonify
 from gadjit import utils
 from gadjit import models
+
+app = Flask(__name__)
 
 
 # Entrypoint for use as a command-line tool
@@ -19,8 +21,27 @@ from gadjit import models
     default="config.yaml",
     help="Path to the configuration file.",
 )
-def main(config_path):
-    run(config_path=config_path)
+@click.option("--server", is_flag=True, help="Enable server mode.")
+@click.option(
+    "--port",
+    default=8080,
+    type=int,
+    show_default=True,
+    help="Port to run the server on.",
+)
+@click.pass_context
+def main(ctx, config_path, server, port):
+    if server and port is None:
+        raise click.UsageError(
+            "The '--port' option is required when '--server' is specified."
+        )
+
+    if server:
+        app.config["CONFIG_PATH"] = config_path
+        os.environ["FLASK_ENV"] = "production"
+        app.run(host="0.0.0.0", port=port)
+    else:
+        run(config_path=config_path)
 
 
 # Entrypoint as an AWS Lambda deployment
@@ -33,12 +54,28 @@ def lambda_handler(event, context):
             "body": json.dumps({"success": True}),
         }
     except Exception as e:
-        raise e
+        logging.exception("An unhandled exception was raised during execution.")
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
             "body": json.dumps({"success": False, "message": str(e)}),
         }
+
+
+# Handler for the Flask HTTP request
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+        event = request.get_json()
+    else:
+        event = None
+
+    try:
+        run(config_path=app.config.get("CONFIG_PATH"), event=event)
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        logging.exception("An unhandled exception was raised during execution.")
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
 def run(config_path=None, event=None):
@@ -54,6 +91,9 @@ def run(config_path=None, event=None):
     """
 
     # Try to load the config from disk, then fall back to envs.
+    # Because run() is called on each request in server mode,
+    # this means we can update config on the fly without
+    # restarting.
     if config_path and os.path.exists(config_path):
         with open(config_path, "r") as file:
             config = yaml.safe_load(file)
@@ -115,7 +155,7 @@ def run(config_path=None, event=None):
                 f"This is an automated message."
             )
             iga_plugin.comment_request(access_request, comment)
-            # iga_plugin.deny_request(access_request)  # TODO uncomment
+            iga_plugin.deny_request(access_request)
         elif enforce_needs_manual_review or final_score < 1:
             logging.info(
                 f"Score: {final_score}; recommending {access_request.requester.email} NOT be added to {access_request.entitlement.name}."
@@ -129,7 +169,7 @@ def run(config_path=None, event=None):
             )
             if config.get("gadjit").get("include_score_in_comments", False):
                 comment = f"{comment} [{final_score}]"
-            # iga_plugin.comment_request(access_request, comment)  # TODO uncomment
+            iga_plugin.comment_request(access_request, comment)
         elif final_score >= 1:
             logging.info(
                 f"Score: {final_score}; recommending {access_request.requester.email} be added to {access_request.entitlement.name}."
@@ -139,18 +179,24 @@ def run(config_path=None, event=None):
                 f"has reviewed this access request and believes this access is appropriate. "
                 f"This is an automated message."
             )
+
+            # Check if we should include the final score in the comment on the request.
             if config.get("gadjit").get("include_score_in_comments", False):
                 comment = f"{comment} [{final_score}]"
-            # iga_plugin.comment_request(access_request, comment)  # TODO uncomment
 
-            # Some config sanity needed here. This value can come in as a comma-delimited string or a list
+            # Send comment.
+            iga_plugin.comment_request(access_request, comment)
+
+            # Now we're going to check if the bot can auto-approve this request.
+            # Some config sanity needed here first, as this value can come in as a
+            # comma-delimited string or a list.
             entitlements_to_auto_approve = config.get("gadjit").get(
                 "entitlements_to_auto_approve", []
             )
             if isinstance(entitlements_to_auto_approve, str):
                 entitlements_to_auto_approve = entitlements_to_auto_approve.split(",")
 
-            # Clean up the list entries
+            # Clean up the entitlements_to_auto_approve list entries (strip whitespace)
             entitlements_to_auto_approve = [
                 x.strip().lower() for x in entitlements_to_auto_approve
             ]
@@ -161,7 +207,8 @@ def run(config_path=None, event=None):
             ) or (
                 access_request.entitlement.id.lower() in entitlements_to_auto_approve
             ):
-                # iga_plugin.approve_request(access_request)  # TODO uncomment
+                # Yes, this entitlement is on the allow list, go ahead and issue the approval.
+                iga_plugin.approve_request(access_request)
                 logging.info(
                     f"Requested entitlement is on the allow list for automatic approval. User {access_request.requester.email} has been added to {access_request.entitlement.name}."
                 )

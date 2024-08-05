@@ -57,8 +57,8 @@ class ConductorOneCronPlugin(models.BaseGadjitIGAPlugin):
         # Prepare time-related search operators
         now = datetime.utcnow()
         one_minute_ago = now - timedelta(
-            hours=16  # TODO change to 65s
-        )  # cron runs once per minute, adding a few seconds of grace
+            seconds=63  # cron runs once per minute, adding a few seconds of grace
+        )
         created_after = one_minute_ago.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         task_summaries = self.client.search_tasks(
@@ -231,7 +231,7 @@ class ConductorOneCronPlugin(models.BaseGadjitIGAPlugin):
             title=_user_api_response.get("title"),
             department=_user_api_response.get("department"),
             global_job_level=_user_api_response.get("globalJobLevel"),
-            supervisory_organization=_user_api_response.get("SupervisoryOrganization"),
+            organizational_unit=_user_api_response.get("SupervisoryOrganization"),
             email=_user_api_response.get("email"),
         )
 
@@ -242,7 +242,6 @@ class ConductorOneCronPlugin(models.BaseGadjitIGAPlugin):
             duration=task_summary.get("duration"),
             requester=requester,
             entitlement=entitlement,
-            # iga_metadata={"policy_step_id": task_summary.get('task_policy_step_id'), "app_entitlement_id": task_summary.get('app_entitlement_id')}
             iga_metadata={"policy_step_id": task_summary.get("task_policy_step_id")},
         )
 

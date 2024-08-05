@@ -161,19 +161,6 @@ class Entitlement:
     """
 
     def __init__(self, id, parent_app_id, name, description, members):
-        """
-        Initialize a new instance of a class.
-
-        Args:
-            id (int): The ID of the instance.
-            parent_app_id (int): The parent application ID.
-            name (str): The name of the instance.
-            description (str): The description of the instance.
-            members (list): A list of members associated with the instance.
-
-        Returns:
-            None
-        """
         self.id = id
         self.parent_app_id = parent_app_id
         self.name = name
@@ -194,7 +181,7 @@ class Requester:
         department (str): The department the requester belongs to.
         title_and_department (str): The formatted string combining the title and department.
         global_job_level (int): The global job level of the requester.
-        supervisory_organization (str): The supervisory organization the requester belongs to.
+        organizational_unit (str): The organizational unit the requester belongs to.
         email (str): The email address of the requester.
     """
 
@@ -207,23 +194,9 @@ class Requester:
         title,
         department,
         global_job_level,
-        supervisory_organization,
+        organizational_unit,
         email,
     ):
-        """
-        Initialize an Employee object with the given attributes.
-
-        Args:
-            id (int): The employee ID.
-            mgmt_chain (str): The management chain of the employee.
-            manager (str): The name of the employee's manager.
-            manager_id (int): The ID of the employee's manager.
-            title (str): The job title of the employee.
-            department (str): The department the employee works in.
-            global_job_level (int): The global job level of the employee.
-            supervisory_organization (str): The supervisory organization of the employee.
-            email (str): The email address of the employee.
-        """
         self.id = id
         self.mgmt_chain = mgmt_chain
         self.manager = manager
@@ -232,7 +205,7 @@ class Requester:
         self.department = department
         self.title_and_department = f"{title}, {department}"
         self.global_job_level = global_job_level
-        self.supervisory_organization = supervisory_organization
+        self.organizational_unit = organizational_unit
         self.email = email
 
 
@@ -252,20 +225,6 @@ class AccessRequest:
     def __init__(
         self, id, description, duration, requester, entitlement, iga_metadata={}
     ):
-        """
-        Initialize a new object with the given parameters.
-
-        Args:
-            id (int): The unique identifier for the object.
-            description (str): A description of the object.
-            duration (int): The duration of the object.
-            requester (str): The requester of the object.
-            entitlement (str): The entitlement of the object.
-            iga_metadata (dict, optional): Additional metadata for the object. Defaults to an empty dictionary.
-
-        Returns:
-            None.
-        """
         self.id = id
         self.description = description
         self.duration = duration
