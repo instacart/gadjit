@@ -1,0 +1,38 @@
+gadjit:
+  log_level: "info"
+  refer_to_myself_as: "The Gadjit AI-powered access assistance bot"
+  include_score_in_comments: true
+  entitlements_to_auto_approve:
+    - "Some-Entitlement-Name"
+    - "Team - Security"
+    - "The entitlement ID from your IGA system works too"
+    - "2cxuJXhzhPoqvbJR75xq8ZVCBsK"
+    - "In either case, matching is NOT case-sensitive"
+    - "team - security"
+    - "TEAM - SECURITY"
+
+iga_plugins:
+  - name: conductorone_cron
+    enabled: true
+    config:
+      reassign_to_user: "2V3PjV9pwqVFmdcfyAsEQvDkucr"
+      base_url: "https://acme.conductor.one"
+      client_id: "strange-hydra-68836@acme.conductor.one/pcc"
+      client_secret: "CONDUCTORONE_API_SECRET"
+
+llm_plugins:
+  - name: openai
+    enabled: true
+    config:
+      secret_key: "OPENAI_API_KEY"
+
+  - name: aws_api_gateway_openai_proxy
+    enabled: false
+    config:
+      api_gateway_url: "https://dawjryzpri.execute-api.us-east-1.amazonaws.com/proxy/openai/v1/chat/completions"
+      api_gateway_role_arn: "arn:aws:iam::123456789123:role/apigateway-invocation-role"
+
+scoring_plugins:
+  - name: requester_profile_attribute_proximity
+    enabled: true
+    config:
