@@ -57,8 +57,7 @@ class ConductorOneCronPlugin(models.BaseGadjitIGAPlugin):
         # Prepare time-related search operators
         now = datetime.utcnow()
         one_minute_ago = now - timedelta(
-            hours=36  # TODO remove and uncomment below
-            # seconds=63  # cron runs once per minute, adding a few seconds of grace
+            seconds=63  # cron runs once per minute, adding a few seconds of grace
         )
         created_after = one_minute_ago.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -69,10 +68,6 @@ class ConductorOneCronPlugin(models.BaseGadjitIGAPlugin):
             access_request = self._prepare_context_objects(
                 self._get_access_token(), task_summary
             )
-            if (
-                access_request.requester.email != "matthew.sullivan@instacart.com"
-            ):  # TODO remove
-                continue  # TODO remove
             access_requests.append(access_request)
 
         return access_requests
