@@ -9,7 +9,7 @@
 Gadjit attempts to be a vendor-neutral framework for reviewing access requests. We achieve this with a plugin system which supports three different types of plugins:
 
 -   **IGA Plugins**: integrate with governance tools such as ConductorOne, Opal, or Lumos.
--   **LLM Plugins**: integrate with LLMs such as OpenAI, Athropic, or Gemini.
+-   **LLM Plugins**: integrate with LLMs such as OpenAI, Anthropic, or Gemini.
 -   **Scoring Plugins**: evaluate an access request based on a set of factors and return a score.
 
 We strongly encourage contribution of new plugins, please open a pull request!
