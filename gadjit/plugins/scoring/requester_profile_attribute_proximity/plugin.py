@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 from json.decoder import JSONDecodeError
 from gadjit.models import BaseGadjitScoringPlugin
@@ -153,6 +154,7 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
         logging.debug(llm_result)
 
         try:
+            llm_result = self.__remove_json_markdown(llm_result)
             results = json.loads(llm_result).get("overlap_users")
         except JSONDecodeError as e:
             logging.exception(
@@ -356,6 +358,7 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
             return None
 
         try:
+            llm_result = self.__remove_json_markdown(llm_result)
             results = json.loads(llm_result).get("relationship_score")
         except JSONDecodeError as e:
             logging.exception(
@@ -397,3 +400,27 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
         if len(all_words) == 0:
             return 0  # To avoid division by zero if both strings are empty
         return len(common_words) / len(all_words)
+
+    def __remove_json_markdown(self, input):
+        """
+        Removes JSON markdown formatting from LLM response.
+
+        Args:
+            input (str): The response from the LLM.
+
+        Returns:
+            str: The LLM response with markdown formatters stripped.
+        """
+
+        # Check if the input contains a markdown code block
+        match = re.search(r'```json(.*?)```', input, re.DOTALL)
+
+        if match:
+            logging.debug("Stripping markdown from input string.")
+            # Extract the content within the markdown code block
+            json_content = match.group(1).strip()
+        else:
+            # If no markdown, use the entire input string
+            json_content = input.strip()
+
+        return json_content
