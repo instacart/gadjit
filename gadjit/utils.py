@@ -1,6 +1,6 @@
-import importlib
 import os
 
+from importlib.util import spec_from_file_location, module_from_spec
 from . import models
 
 
@@ -103,8 +103,8 @@ def load_plugins(plugin_type, config):
             )
 
             # Dynamically import the plugin module
-            spec = importlib.util.spec_from_file_location(plugin_name, plugin_path)
-            module = importlib.util.module_from_spec(spec)
+            spec = spec_from_file_location(plugin_name, plugin_path)
+            module = module_from_spec(spec)
             spec.loader.exec_module(module)
 
             # Instantiate the plugin
