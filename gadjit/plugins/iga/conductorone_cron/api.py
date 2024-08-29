@@ -103,6 +103,11 @@ class ConductorOneAPIClient:
             "taskStates": ["TASK_STATE_OPEN"],
             "createdAfter": created_after,
             "currentStep": "TASK_SEARCH_CURRENT_STEP_APPROVAL",  # Only tasks awaiting an approval
+            "taskTypes": [
+                {
+                    "grant": {}
+                }
+            ],
         }
 
         response = requests.post(url, headers=headers, json=payload)
