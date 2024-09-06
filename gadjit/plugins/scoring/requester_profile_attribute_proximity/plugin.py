@@ -121,6 +121,11 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
             ValueError: If the field type is not supported.
             JSONDecodeError: If there is an issue decoding the JSON response.
         """
+
+        # Return early if entitlement_users is empty.
+        if not entitlement_users:
+            return []
+
         if field_type == "title_and_department":
             field_type_verbose = "job title"
             system_example_field_input = "Senior Analyst, Eng - Online Grocery"
@@ -204,6 +209,7 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
         Raises:
             None
         """
+
         entitlement_users_flattened = []
         for email, profile in entitlement_users.items():
             # entitlement_users_flattened.append(f"{email}: {profile[field_type]}")
@@ -296,6 +302,7 @@ class RequesterProfileAttributeProximityScoringPlugin(BaseGadjitScoringPlugin):
         The function uses the LLM plugin to query and determine the relationship score between the job title and group access control based on provided information.
         The output must be in JSON format with the key 'relationship_score'.
         """
+
         user_prompt = (
             f"A new applicant wants to join the group. The applicant has the job title "
             f'of:\n"{task_target_profile_title_dept}"\n\nThe group\'s '
