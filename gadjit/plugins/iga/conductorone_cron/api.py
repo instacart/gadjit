@@ -259,7 +259,7 @@ class ConductorOneAPIClient:
             for user in users:
                 okta_user = user.get("appUser").get("appUser")
                 email = okta_user.get("email")
-                profile = okta_user.get("profile")
+                profile = okta_user.get("profile") or {}
 
                 entitlement_users[email] = {
                     "id": okta_user.get("identityUserId"),
