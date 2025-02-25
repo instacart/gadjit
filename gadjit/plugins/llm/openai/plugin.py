@@ -13,7 +13,6 @@ class OpenAIPlugin(BaseGadjitLLMPlugin):
 
     Methods:
         query(self, system_prompt, user_prompt): Sends a query to the OpenAI API and retrieves a response.
-        _get_access_token(self): Retrieves and caches AWS credentials for the OpenAI API.
 
     Attributes:
         Inherits from BaseGadjitLLMPlugin.
@@ -86,57 +85,3 @@ class OpenAIPlugin(BaseGadjitLLMPlugin):
                 logging.exception(f"Could not base64 the content: {content}")
 
             return content
-
-    def _get_access_token(self):
-        # Have we assumed our target role and saved session creds?
-        """
-        Get the AWS access token for API Gateway.
-
-        Returns:
-            botocore.credentials.Credentials: The AWS credentials for accessing API Gateway.
-
-        Raises:
-            RuntimeError: If unable to refresh AWS credentials.
-        """
-        if not self.ai_gateway_role_credentials or (
-            datetime.now() - self.ai_gateway_role_credentials_timestamp
-            > timedelta(minutes=5)
-        ):
-            logging.debug(
-                f"Refreshing AWS credentials. Last cached timestamp: {self.ai_gateway_role_credentials_timestamp}"
-            )
-            credentials = self.__assume_role(self.config.get("ai_gateway_role_arn"))
-
-            # Update boto3 session with assumed role credentials
-            boto3_session = boto3.Session(
-                aws_access_key_id=credentials["AccessKeyId"],
-                aws_secret_access_key=credentials["SecretAccessKey"],
-                aws_session_token=credentials["SessionToken"],
-            )
-            self.ai_gateway_role_credentials = (
-                boto3_session.get_credentials().get_frozen_credentials()
-            )
-            self.ai_gateway_role_credentials_timestamp = datetime.now()
-        else:
-            logging.debug(
-                f"Using cached AWS credentials. Last cached timestamp: {self.ai_gateway_role_credentials_timestamp}"
-            )
-
-        return self.ai_gateway_role_credentials
-
-    def __assume_role(self, role_arn):
-        """
-        Assume an AWS IAM role using the provided role ARN.
-
-        Args:
-            role_arn (str): The Amazon Resource Name (ARN) of the IAM role to assume.
-
-        Returns:
-            dict: A dictionary containing the credentials of the assumed role.
-        """
-        sts_client = boto3.client("sts")
-        assumed_role = sts_client.assume_role(
-            RoleArn=role_arn, RoleSessionName="aigateway-session"
-        )
-        credentials = assumed_role["Credentials"]
-        return credentials
