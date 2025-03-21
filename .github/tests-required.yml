@@ -1,4 +1,4 @@
-# Branch protection rules for main and master branches
+# Passing tests required rules for main and master branches
 branches:
   - name: main
     protection:
