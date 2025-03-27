@@ -1,0 +1,23 @@
+# Passing tests required rules for main and master branches
+branches:
+  - name: main
+    protection:
+      required_status_checks:
+        contexts:
+          - "Run Tests"
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+      enforce_admins: true
+      allow_force_pushes: false
+      allow_deletions: false
+
+  - name: master
+    protection:
+      required_status_checks:
+        contexts:
+          - "Run Tests"
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+      enforce_admins: true
+      allow_force_pushes: false
+      allow_deletions: false 

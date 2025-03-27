@@ -3,3 +3,6 @@ requests==2.32.3
 PyYAML==6.0.1
 click==8.1.7
 Flask==3.0.3
+pytest==8.0.2
+pytest-cov==4.1.0
+pytest-mock==3.12.0
