@@ -42,16 +42,14 @@ class OpenAIPlugin(BaseGadjitLLMPlugin):
         }
 
         data = {
-            "model": "gpt-4o",
+            "model": "gpt-6-luna",
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            "temperature": 1,
-            "max_tokens": 512,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 0,
+            # Keep the short response budget available for output, not reasoning.
+            "reasoning_effort": "none",
+            "max_completion_tokens": 512,
         }
 
         response = requests.post(url, headers=headers, json=data)
