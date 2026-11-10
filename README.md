@@ -18,8 +18,13 @@ We strongly encourage contribution of new plugins, please open a pull request!
 -   [ConductorOne](https://www.conductorone.com/)
 
 ### Currently-Supported LLM Plugins
--   [OpenAI GPT-4o](https://openai.com/)
--   [OpenAI GPT-4o via AWS API Gateway with IAM Authentication](https://mattslifebytes.com/2024/06/13/safely-accessing-an-internal-alb-in-a-private-subnet-using-aws-api-gateway-and-terraform-and-python/) (Instacart uses an OpenAI proxy internally)
+-   [OpenAI GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna)
+-   [OpenAI GPT-6 Luna via AWS API Gateway with IAM Authentication](https://mattslifebytes.com/2024/06/13/safely-accessing-an-internal-alb-in-a-private-subnet-using-aws-api-gateway-and-terraform-and-python/) (Instacart uses an OpenAI proxy internally)
+
+Both plugins request `gpt-6-luna` through Chat Completions with
+`reasoning_effort: "none"` and `max_completion_tokens: 512`. Reasoning is disabled
+for the short access-review responses; prompts and response handling are unchanged.
+The AWS proxy must allow and forward this model and these parameters.
 
 ### Currently-Supported Scoring Plugins
 

@@ -12,7 +12,7 @@ from gadjit.models import BaseGadjitLLMPlugin
 
 class AWSAPIGatewayOpenAIProxyPlugin(BaseGadjitLLMPlugin):
     """
-    A class representing a plugin for interacting with OpenAI's GPT-4o model through AWS API Gateway.
+    A class representing a plugin for interacting with OpenAI's GPT-6 Luna model through AWS API Gateway.
 
     Attributes:
         api_gateway_role_credentials (dict): The AWS credentials for accessing the API Gateway.
@@ -44,16 +44,14 @@ class AWSAPIGatewayOpenAIProxyPlugin(BaseGadjitLLMPlugin):
         }
 
         data = {
-            "model": "gpt-4o",
+            "model": "gpt-6-luna",
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            "temperature": 1,
-            "max_tokens": 512,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 0,
+            # Keep the short response budget available for output, not reasoning.
+            "reasoning_effort": "none",
+            "max_completion_tokens": 512,
         }
         method = "POST"
 
